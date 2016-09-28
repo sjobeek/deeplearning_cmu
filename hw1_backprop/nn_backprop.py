@@ -8,11 +8,15 @@ import matplotlib.pyplot as plt
 IMG_DIM = 28
 
 def tomat(vec):
-    return vec.reshape((IMG_DIM,IMG_DIM))
+    img_dim = int(np.sqrt(len(vec)))
+    return vec.reshape((img_dim,img_dim))
 
-def plot_vec(img_vec):
+def plot_1(img_vec):
     """img_mat must be single vector-representation of image to plot"""
-    img_mat = img_vec.reshape((IMG_DIM,IMG_DIM))
+    if len(img_vec.shape) <= 1:
+        img_mat = tomat(img_vec)
+    else:
+        img_mat = img_vec # It was a matrix already
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     ax.matshow(img_mat, cmap=mpl.cm.binary)
@@ -24,6 +28,7 @@ def plot_100(img_vec_array):
     image_mat_10x10 = np.zeros((IMG_DIM*10, IMG_DIM*10))
     for x in range(10):
         for y in range(10):
+            # Replace sub-matrix with appropriate values
             image_mat_10x10[IMG_DIM*y : IMG_DIM*y+IMG_DIM,
                             IMG_DIM*x : IMG_DIM*x+IMG_DIM] = tomat(first_100[10*y + x])
     fig = plt.figure()
