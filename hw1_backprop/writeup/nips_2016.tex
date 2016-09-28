@@ -20,8 +20,12 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts}
+\usepackage{dsfont}
 
-\title{Formatting instructions for NIPS 2016}
+
+\title{10807 Topics in Deep Learning HW1}
 
 % The \author macro works with any number of authors. There are two
 % commands used to separate the names and addresses of multiple
@@ -34,13 +38,11 @@
 % author name.
 
 \author{
-  David S.~Hippocampus\thanks{Use footnote for providing further
-    information about author (webpage, alternative
-    address)---\emph{not} for acknowledging funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
+  Erik Sjoberg\\
+  esjoberg\\
+  School of Computer Science\\
+  The Robotics Institute\\
+  \texttt{esjoberg@cmu.edu} \\
   %% examples of more authors
   %% \And
   %% Coauthor \\
@@ -70,337 +72,173 @@
 \maketitle
 
 \begin{abstract}
-  The abstract paragraph should be indented \nicefrac{1}{2}~inch
-  (3~picas) on both the left- and right-hand margins. Use 10~point
-  type, with a vertical spacing (leading) of 11~points.  The word
-  \textbf{Abstract} must be centered, bold, and in point size 12. Two
-  line spaces precede the abstract. The abstract must be limited to
-  one paragraph.
+  Simple implementation of backpropagation in a fully connected neural network.
 \end{abstract}
 
-\section{Submission of papers to NIPS 2016}
+\section{Overfitting and Model Complexity}
 
-\textbf{There is a new style file for papers submitted in 2016!}
+\subsection{Typical Training Behavior: Error Rate vs Model Complexity}
+\includegraphics[scale=0.6]{error_vs_modelcomplexity.png} 
 
-NIPS requires electronic submissions.  The electronic submission site
-is
-\begin{center}
-  \url{https://cmt.research.microsoft.com/NIPS2016/}
-\end{center}
+\subsection{Typical Training Behavior: Error Rate vs Training Set Size}
+\includegraphics[scale=0.6]{error_vs_trainsetsize.png} 
 
-Please read carefully the instructions below and follow them
-faithfully.
 
-\subsection{Style}
+\section{Expected Loss for Regression}
 
-Papers to be submitted to NIPS 2016 must be prepared according to the
-instructions presented here. Papers may only be up to eight pages
-long, including figures. Since 2009 an additional ninth page
-\emph{containing only acknowledgments and/or cited references} is
-allowed. Papers that exceed nine pages will not be reviewed, or in any
-other way considered for presentation at the conference.
+\subsection{a) Case q = 1}
+Starting with 
+\begin{gather}
+E \left[ { L }_{ q } \right] =\int { \int { { |y(x) - t| }^{ q }p(x,t)dtdx }  } 
+\end{gather}
+using the independence of our choice of y(x) every point x, we can simplify this for the purposes of minimization to the following:
+\begin{gather}
+E \left[ { L }_{ q } \right] = \int { { |y(x) - t| }^{ q }p(t|x)dt }
+\end{gather}
+For the case q=1, the both sides of the integral around y(x) have linearly increasing weight, and the minimum is reached when this linear valley is centered on the average of the distribution of density.
 
-The margins in 2016 are the same as since 2007, which allow for
-$\sim$$15\%$ more words in the paper compared to earlier years.
+With Q=1, taking the directional derivative of the above with respect to y(x) and setting it equal to zero gives
+\begin{gather}
+\int _{-\infty}^{y(x)} {p(t|x)dt } - \int _{y(x)}^{\infty} {p(t|x)dt } = 0
+\end{gather}
 
-Authors are required to use the NIPS \LaTeX{} style files obtainable
-at the NIPS website as indicated below. Please make sure you use the
-current files and not previous versions. Tweaking the style files may
-be grounds for rejection.
+Which is the same as saying that the expectation corresponds to the conditional median. 
 
-\subsection{Retrieval of style files}
+\subsection{b) Case q -> 0}
 
-The style files for NIPS and other conference information are
-available on the World Wide Web at
-\begin{center}
-  \url{http://www.nips.cc/}
-\end{center}
-The file \verb+nips_2016.pdf+ contains these instructions and
-illustrates the various formatting requirements your NIPS paper must
-satisfy.
+In the case of the limit where q approaches 0, the distribution becomes equal to 1 everywhere except for an infinitely narrow valley right above $y(x)=t$.
 
-The only supported style file for NIPS 2016 is \verb+nips_2016.sty+,
-rewritten for \LaTeXe{}.  \textbf{Previous style files for \LaTeX{}
-  2.09, Microsoft Word, and RTF are no longer supported!}
+Therefore, the expected loss will be minimized when this valley is directly above the point of the function with the highest probability density.  This corresponds to the conditional mode. 
 
-The new \LaTeX{} style file contains two optional arguments:
-\verb+final+, which creates a camera-ready copy, and \verb+nonatbib+,
-which will not load the \verb+natbib+ package for you in case of
-package clash.
 
-At submission time, please omit the \verb+final+ option. This will
-anonymize your submission and add line numbers to aid review.  Please
-do \emph{not} refer to these line numbers in your paper as they will
-be removed during generation of camera-ready copies.
+\section{Binary Classification Error Function}
 
-The file \verb+nips_2016.tex+ may be used as a ``shell'' for writing
-your paper. All you have to do is replace the author, title, abstract,
-and text of the paper with your own.
+We know that for general binary classification, the cross-entropy loss function takes the form $l=-\sum c_i\log(p_i)$ where $c_i$ is the class indicator. This corresponds to the negative log likelihood. 
 
-The formatting instructions contained in these style files are
-summarized in Sections \ref{gen_inst}, \ref{headings}, and
-\ref{others} below.
+If there is a probability $\epsilon$ that a class label is wrong, we can say that 
+\[
+p_i=\epsilon/N + (1-\epsilon)y_i
+\]
+where N is the total number of classes, 2 in this case. 
 
-\section{General formatting instructions}
-\label{gen_inst}
+The error function then becomes:
+\[
+l=-\sum c_i\log(\epsilon/2 + (1-\epsilon)y_i)
+\]
 
-The text must be confined within a rectangle 5.5~inches (33~picas)
-wide and 9~inches (54~picas) long. The left margin is 1.5~inch
-(9~picas).  Use 10~point type with a vertical spacing (leading) of
-11~points.  Times New Roman is the preferred typeface throughout, and
-will be selected for you by default.  Paragraphs are separated by
-\nicefrac{1}{2}~line space (5.5 points), with no indentation.
 
-The paper title should be 17~point, initial caps/lower case, bold,
-centered between two horizontal rules. The top rule should be 4~points
-thick and the bottom rule should be 1~point thick. Allow
-\nicefrac{1}{4}~inch space above and below the title to rules. All
-pages should start at 1~inch (6~picas) from the top of the page.
 
-For the final version, authors' names are set in boldface, and each
-name is centered above the corresponding address. The lead author's
-name is to be listed first (left-most), and the co-authors' names (if
-different address) are set to follow. If there is only one co-author,
-list both author and co-author side by side.
 
-Please pay special attention to the instructions in Section \ref{others}
-regarding figures, tables, acknowledgments, and references.
+\section{Generalized Gaussian}
 
-\section{Headings: first level}
-\label{headings}
+\subsection{Show Distribution is Normalized}
+Starting with the generalized Gaussian below, 
+\[
+P(x)=\frac { q }{ {2(2 \sigma ^{2})^{1/q}  } \Gamma (1/q) } exp(- \frac {|x|^{q}}{2\sigma^{2}})  
+\]
+first see that when q = 2, it can be shown that $\Gamma(1/2) = \sqrt{\pi}$ and $(2\sigma^{2})^{1/2} = \sigma \sqrt{2}$. Canceling the 2 from the top and bottom of the left side, brings us back to the familiar left-hand form of the gaussian:
+\[
+P(x) = \frac{1}{{\sigma \sqrt {2\pi } }}e^{{{ - \left( {x - \mu } \right)^2 } \mathord{\left/ {\vphantom {{ - \left( {x - \mu } \right)^2 } {2\sigma ^2 }}} \right. \kern-\nulldelimiterspace} {2\sigma ^2 }}}
+\]
 
-All headings should be lower case (except for first word and proper
-nouns), flush left, and bold.
+This generalized distribution can be shown to be properly normalized (adds up to one) with the knowledge that the following equation holds in the eve more general case where x is not restricted to be positive.  
+\begin{gather}
+\includegraphics[scale=1]{big_integral.png} 
+\end{gather}
 
-First-level headings should be in 12-point type.
+When x is positive, as in our example above, the second gamma term is redundant and this factor perfectly cancels out the remaining terms of our original generalized Gaussian. 
 
-\subsection{Headings: second level}
+\subsection{Derive Log-likelihood Function}
+The derivation of the log-likelihood function can proceed as follows
+\[
+L(q, \sigma,x_1, ..., x_n)=\prod _{ j=1 }^{ n }{   \frac { q }{ { 2(2\sigma ^{ 2 })^{ 1/q } }\Gamma (1/q) } exp(-\frac { |x_{j}|^{ q } }{ 2\sigma ^{ 2 } } )}
+\]
+\[
+L(q,\sigma ,x_{ 1 },...,x_{ n })=\frac { q }{ { 2(2\sigma ^{ 2 })^{ 1/q } }\Gamma (1/q) } exp(- 1/2\sigma^2\sum _{ j=1 }^{n  }{   |x_{ j }|^{ q } } )
+\]
+\[
+log(L(q,\sigma ,x_{ 1 },...,x_{ n })) = ln(\frac { q }{ { 2(2\sigma ^{ 2 })^{ 1/q } }\Gamma (1/q) } ) +ln(exp(- 1/2\sigma^2\sum _{ j=1 }^{n  }{   |x_{ j }|^{ q } } ))
+\]
+\[
+log(L(q,\sigma ,x_{ 1 },...,x_{ n })) = ln(\frac { q }{ { 2(2\sigma ^{ 2 })^{ 1/q } }\Gamma (1/q) } ) - \frac{1}{2\sigma^2}\sum _{ j=1 }^{n  }{   |x_{ j }|^{ q } } 
+\]
 
-Second-level headings should be in 10-point type.
 
-\subsubsection{Headings: third level}
 
-Third-level headings should be in 10-point type.
+\section{Implementation of Backpropagation}
 
-\paragraph{Paragraphs}
+\subsection{a) Basic Generalization}
+The red lines in Figure \ref{fig:crosen1} shows test-set performance across 200 epochs, while the blue lines show the train-set performance. The network was trained 5 times with different seeds each time, with a learning rate of 0.1.  
 
-There is also a \verb+\paragraph+ command available, which sets the
-heading in bold, flush left, and inline with the text, with the
-heading followed by 1\,em of space.
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-These instructions apply to everyone.
-
-\subsection{Citations within the text}
-
-The \verb+natbib+ package will be loaded for you by default.
-Citations may be author/year or numeric, as long as you maintain
-internal consistency.  As to the format of the references themselves,
-any style is acceptable as long as it is used consistently.
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations
-appropriate for use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-If you wish to load the \verb+natbib+ package with options, you may
-add the following before loading the \verb+nips_2016+ package:
-\begin{verbatim}
-   \PassOptionsToPackage{options}{natbib}
-\end{verbatim}
-
-If \verb+natbib+ clashes with another package you load, you can add
-the optional argument \verb+nonatbib+ when loading the style file:
-\begin{verbatim}
-   \usepackage[nonatbib]{nips_2016}
-\end{verbatim}
-
-As submission is double blind, refer to your own published work in the
-third person. That is, use ``In the previous work of Jones et
-al.\ [4],'' not ``In our previous work [4].'' If you cite your other
-papers that are not widely available (e.g., a journal paper under
-review), use anonymous author names in the citation, e.g., an author
-of the form ``A.\ Anonymous.''
-
-\subsection{Footnotes}
-
-Footnotes should be used sparingly.  If you do require a footnote,
-indicate footnotes with a number\footnote{Sample of the first
-  footnote.} in the text. Place the footnotes at the bottom of the
-page on which they appear.  Precede the footnote with a horizontal
-rule of 2~inches (12~picas).
-
-Note that footnotes are properly typeset \emph{after} punctuation
-marks.\footnote{As in this example.}
-
-\subsection{Figures}
-
-All artwork must be neat, clean, and legible. Lines should be dark
-enough for purposes of reproduction. The figure number and caption
-always appear after the figure. Place one line space before the figure
-caption and one line space after the figure. The figure caption should
-be lower case (except for first word and proper nouns); figures are
-numbered consecutively.
-
-You may use color figures.  However, it is best for the figure
-captions and the paper body to be legible if the paper is printed in
-either black/white or in color.
 \begin{figure}[h]
   \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
+  \includegraphics[scale=0.6]{../5a_crossentropy_vs_epoch_200.png} 
+  \caption{Training cross-entropy error (blue) and test cross-entropy error (red) for 5 seeds.}
+  \label{fig:crosen1}
 \end{figure}
 
-\subsection{Tables}
+It is clear that the performance is significantly different on the test set versus the training set.  With this learning rate, the network achieves it's best test-set performance after only 10 epochs, after which the cross-entropy of the test-set starts to rise. In contrast, the train-set cross-entropy performance continues to decrease for up to around 60 epochs before leveling out. The validation curve clearly shows a different behavior.
 
-All tables must be centered, neat, clean and legible.  The table
-number and title always appear before the table.  See
-Table~\ref{sample-table}.
 
-Place one line space before the table title, one line space after the
-table title, and one line space after the table. The table title must
-be lower case (except for first word and proper nouns); tables are
-numbered consecutively.
+\subsection{b) Classification Error}
 
-Note that publication-quality tables \emph{do not contain vertical
-  rules.} We strongly suggest the use of the \verb+booktabs+ package,
-which allows for typesetting high-quality, professional tables:
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
+Figure \ref{fig:class1} shows the test and train set performance as measured by the classification error across 200 epochs.  The behavior of the classification training error is clearly different from that of the cross entropy test error: the classification error never actually increases as training progresses, in contrast with the cross entropy error which did rise (as expected) as training progressed. 
 
-\begin{table}[t]
-  \caption{Sample table title}
-  \label{sample-table}
+\begin{figure}[h]
+  \centering 
+  \includegraphics[scale=0.6]{../5b_misclassification_vs_epoch_200.png} 
+  \caption{Training classification error (blue) and test classification error (red) for 5 seeds.}
+  \label{fig:class1}
+\end{figure}
+
+This suggests that cross-entropy may do a better job than classification error of indicating when over-fitting is taking place. 
+
+
+\subsection{c) Visualizing Parameters}
+
+Figure \ref{fig:paramviz} shows a good amount of structure in the learned parameter W from the bottom level of the network. Curves, edges, and lines reminiscent of numbers and parts of numbers can be seen. 
+
+\begin{figure}[h]
   \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule{1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+  \includegraphics[scale=0.9]{../5c_parameter_viz.png} 
+  \caption{Visualization of 10-by-10 grid of learned parameters from the bottom layer of the network.}
+  \label{fig:paramviz}
+\end{figure}
 
-\section{Final instructions}
+\subsection{d) Learning Rate}
 
-Do not change any aspects of the formatting parameters in the style
-files.  In particular, do not modify the width or length of the
-rectangle the text should fit into, and do not change font sizes
-(except perhaps in the \textbf{References} section; see below). Please
-note that pages should be numbered.
+For my implementation, I found that the performance with lower learning rates is significantly better than higher learning rates as can be see in Figure \ref{fig:learnrates}.  The convergence of test and training performance is far more similar with a rate of 0.01 as compared to 0.1 or 0.2.  With a learning rate of 0.5, no learning appears to take place whatsoever. 
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.8]{../learning_rates.png} 
+  \caption{Visualization of error rates with various learning rates. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:learnrates}
+\end{figure}
 
-\section{Preparing PDF files}
+Figure \ref{fig:momentums} also shows interesting behavior, with the network training significantly better in the absence of momentum. With large momentum, even the train error (blue) fails to converge, showing a U shape. Absolute values of both error functions are also better with minimal momentum. This may be due to the usage of mini-batch size one (gradient updates occur after every training sample). 
 
-Please prepare submission files with paper size ``US Letter,'' and
-not, for example, ``A4.''
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.8]{../momentum_tests.png} 
+  \caption{Visualization of error rates with various momentum values. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentums}
+\end{figure}
 
-Fonts were the main cause of problems in the past years. Your PDF file
-must only contain Type 1 or Embedded TrueType fonts. Here are a few
-instructions to achieve this.
+To choose the best parameters, it is clearly necessary to test them empirically, perhaps performing a grid-search over promising candidate parameter sets. In this case, I would lean towards low or no momentum, as well as a low learning rate to encourage stability when training with mini-batch size equal to 1.
 
-\begin{itemize}
+\subsection{e) Number of Hidden Units}
 
-\item You should directly generate PDF files using \verb+pdflatex+.
 
-\item You can check which fonts a PDF files uses.  In Acrobat Reader,
-  select the menu Files$>$Document Properties$>$Fonts and select Show
-  All Fonts. You can also use the program \verb+pdffonts+ which comes
-  with \verb+xpdf+ and is available out-of-the-box on most Linux
-  machines.
+\subsection{f) Dropout}
 
-\item The IEEE has recommendations for generating PDF files whose
-  fonts are also acceptable for NIPS. Please see
-  \url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
 
-\item \verb+xfig+ "patterned" shapes are implemented with bitmap
-  fonts.  Use "solid" shapes instead.
+\subsection{g) Best-Performing Single Layer}
 
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You
-  should use the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or
-\verb+\mathbb{C}+ for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You
-can also use the following workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-Note that \verb+amsfonts+ is automatically loaded by the
-\verb+amssymb+ package.
 
-\end{itemize}
+\subsection{h) Extension to Multiple Layers}
 
-If your file contains type 3 fonts or non embedded TrueType fonts, we
-will ask you to fix it.
 
-\subsection{Margins in \LaTeX{}}
 
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+ from the \verb+graphicx+ package. Always
-specify the figure width as a multiple of the line width as in the
-example below:
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-See Section 4.4 in the graphics bundle documentation
-(\url{http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf})
 
-A number of width problems arise when \LaTeX{} cannot properly
-hyphenate a line. Please give LaTeX hyphenation hints using the
-\verb+\-+ command when necessary.
-
-\subsubsection*{Acknowledgments}
-
-Use unnumbered third level headings for the acknowledgments. All
-acknowledgments go at the end of the paper. Do not include
-acknowledgments in the anonymized submission, only in the final paper.
-
-\section*{References}
-
-References follow the acknowledgments. Use unnumbered first-level
-heading for the references. Any choice of citation style is acceptable
-as long as you are consistent. It is permissible to reduce the font
-size to \verb+small+ (9 point) when listing the references. {\bf
-  Remember that you can use a ninth page as long as it contains
-  \emph{only} cited references.}
-\medskip
-
-\small
-
-[1] Alexander, J.A.\ \& Mozer, M.C.\ (1995) Template-based algorithms
-for connectionist rule extraction. In G.\ Tesauro, D.S.\ Touretzky and
-T.K.\ Leen (eds.), {\it Advances in Neural Information Processing
-  Systems 7}, pp.\ 609--616. Cambridge, MA: MIT Press.
-
-[2] Bower, J.M.\ \& Beeman, D.\ (1995) {\it The Book of GENESIS:
-  Exploring Realistic Neural Models with the GEneral NEural SImulation
-  System.}  New York: TELOS/Springer--Verlag.
-
-[3] Hasselmo, M.E., Schnell, E.\ \& Barkai, E.\ (1995) Dynamics of
-learning and recall at excitatory recurrent synapses and cholinergic
-modulation in rat hippocampal region CA3. {\it Journal of
-  Neuroscience} {\bf 15}(7):5249-5262.
 
 \end{document}
