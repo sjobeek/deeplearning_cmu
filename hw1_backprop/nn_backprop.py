@@ -60,6 +60,8 @@ def grad_vec_plot(vec, title=""):
     plt.matshow(np.matrix(vec), cmap=mpl.cm.RdBu)
     plt.title(title)
 
+
+
 def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0,
                       train_filepath='./data/digitstrain.txt',
                       test_filepath='./data/digitstest.txt',
@@ -112,6 +114,7 @@ def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0,
     W1_grad = 0
 
 
+
     for epoch in range(epochs):
         # Evaluate Training Data
         for n in range(len(digits_test)):
@@ -140,11 +143,14 @@ def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0,
 
 
         for n in range(len(digits_train)):
+
+            dropout_mask = np.random.binomial(1,(1-dropout), n_hidden)
+            
             ###### Forward Pass
             h0 = digits_train[n]
             # Hidden Layer 1
             PreAct1 = W1 @ h0 + b1
-            h1 = sig(PreAct1)
+            h1 = sig(PreAct1) * dropout_mask
             # Output Layer
 
             PreActOut = Wout @ h1 + b2
@@ -391,3 +397,16 @@ def train_twolayer(epochs=200, rate=0.1, momentum=0.0, dropout=0,
               'class_train_per_epoch': class_train_per_epoch}
 
     return result
+
+if __name__ == "__main__":
+    result_dict = train_singlelayer(epochs=30, rate=0.05)
+    plt.plot(result_dict['ce_test_per_epoch'], c='r')
+    plt.plot(result_dict['ce_train_per_epoch'], c='b')
+    plt.plot(result_dict['class_test_per_epoch'], c='g')
+    plt.plot(result_dict['class_train_per_epoch'], c='k')
+    print('Min Classification Error (test):', 
+          min(result_dict['class_test_per_epoch']))
+    plt.title("Validation Error Rate vs Epoch")
+    plt.show()
+    fig = plot_100(result_dict['W1'])
+    fig.show()

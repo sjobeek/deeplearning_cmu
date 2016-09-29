@@ -198,9 +198,11 @@ This suggests that cross-entropy may do a better job than classification error o
 
 Figure \ref{fig:paramviz} shows a good amount of structure in the learned parameter W from the bottom level of the network. Curves, edges, and lines reminiscent of numbers and parts of numbers can be seen. 
 
+This visible structure is suggestive that the backpropagation is working, and the network is learning generalized structure from the data. 
+
 \begin{figure}[h]
   \centering
-  \includegraphics[scale=0.9]{../5c_parameter_viz.png} 
+  \includegraphics[scale=0.7]{../5c_parameter_viz.png} 
   \caption{Visualization of 10-by-10 grid of learned parameters from the bottom layer of the network.}
   \label{fig:paramviz}
 \end{figure}
@@ -210,7 +212,7 @@ Figure \ref{fig:paramviz} shows a good amount of structure in the learned parame
 For my implementation, I found that the performance with lower learning rates is significantly better than higher learning rates as can be see in Figure \ref{fig:learnrates}.  The convergence of test and training performance is far more similar with a rate of 0.01 as compared to 0.1 or 0.2.  With a learning rate of 0.5, no learning appears to take place whatsoever. 
 \begin{figure}[h]
   \centering
-  \includegraphics[scale=0.8]{../learning_rates.png} 
+  \includegraphics[scale=0.6]{../learning_rates.png} 
   \caption{Visualization of error rates with various learning rates. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
   \label{fig:learnrates}
 \end{figure}
@@ -219,7 +221,7 @@ Figure \ref{fig:momentums} also shows interesting behavior, with the network tra
 
 \begin{figure}[h]
   \centering
-  \includegraphics[scale=0.8]{../momentum_tests.png} 
+  \includegraphics[scale=0.6]{../momentum_tests.png} 
   \caption{Visualization of error rates with various momentum values. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
   \label{fig:momentums}
 \end{figure}
@@ -228,15 +230,81 @@ To choose the best parameters, it is clearly necessary to test them empirically,
 
 \subsection{e) Number of Hidden Units}
 
+Varying the number of hidden units, as seen in Figure \ref{fig:hiddenunits}, has an interesting effect on the error rates as training progresses.  In all cases, higher hidden layer counts resulted in progressively decreased train-set error, as well as faster convergence to those lower values. 
+
+On the other hand, overfitting was a problem for networks with more hidden units as would be expected. The test-set errors (red line) can be seen to grow significantly more quickly with the networks trained with 200 and 500 hidden units. 
+
+It looks like the current setting of 100 hidden units was a sweet spot, as this setting achieved the lowest classification error among all three (0.165 vs as high as 0.211) These networks were trained with rate=0.01 and momentum=0.5, which in contrast to the default setting of hidden layers appears to be a sub-optimal setting for this network. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../hidden_units.png} 
+  \caption{Visualization of error rates with various numbers of hidden layers. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:hiddenunits}
+\end{figure}
 
 \subsection{f) Dropout}
 
 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../dropout1.png} 
+  \caption{Visualization of error rates during training with dropout. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentumsrate1}
+\end{figure}
+
+
 \subsection{g) Best-Performing Single Layer}
+
+After exploring a wide range of parameter values over the previous sections, it became clear that a learning rate of 0.05, momentum of 0, and a layer size of 100 is the best performing combination for this code, achieving a minimum validation error of 7.9/%.  
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../one_layer_best.png} 
+  \caption{Visualization of error rates of the single-layer network with the best performance. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentumsrate1}
+\end{figure}
 
 
 \subsection{h) Extension to Multiple Layers}
 
+When training a network with multiple hidden layers (two in this case), it was interesting to note that less over-fitting was observed on the test set during training out to 200 epochs for most standard settings.  This was a bit unexpected, since the network with more layers has more capacity to fit a model.  It may be that this is reflecting the. 
+
+To evaluate the performance of the network, a 9-cell grid-search over 3 values each of momentum and learning rate was carried out, as can be seen in Figure \ref{fig:momentumsrate1}, \ref{fig:momentumsrate2} and \ref{fig:momentumsrate3}. Momentum varied between 0.0, 0.2, and 0.5, while learning rate varied between 0.1, 0.05, and 0.01. During this training dropout was 0, and hidden-layer count was 100. 
+
+The best performer was the test with momentum at 0 and learning rate at 0.05, achieving a classification error of 8.9\% at around epoch 10. 	 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../momentum0_rate10501.png} 
+  \caption{Visualization of error rates with various momentum values. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentumsrate1}
+\end{figure}
+
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../momentum0_rate10501.png} 
+  \caption{Visualization of error rates with various momentum values. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentumsrate2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../momentum5_rate10501.png} 
+  \caption{Visualization of error rates with various momentum values. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:momentumsrate3}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../two_layer_best.png} 
+  \caption{Visualization of VALIDATION error rates for the best two-layer network. Red and blue are cross-entropy error for test and validation, while green and black are categorization error for test and validation respectively. }
+  \label{fig:twolayerbest}
+\end{figure}
 
 
 
