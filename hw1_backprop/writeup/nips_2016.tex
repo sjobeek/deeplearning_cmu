@@ -245,7 +245,7 @@ It looks like the current setting of 100 hidden units was a sweet spot, as this 
 
 \subsection{f) Dropout}
 
-
+Dropout did help with generalization issues for long-term training, but I found that early stopping was sufficient, and did not use Dropout in my best model.
 
 \begin{figure}[h]
   \centering
@@ -257,15 +257,71 @@ It looks like the current setting of 100 hidden units was a sweet spot, as this 
 
 \subsection{g) Best-Performing Single Layer}
 
-After exploring a wide range of parameter values over the previous sections, it became clear that a learning rate of 0.05, momentum of 0, and a layer size of 100 is the best performing combination for this code, achieving a minimum validation error of 7.9/%.  
+
+\subsubsection*{Learning Rates}
+A learning rate of 0.05 seemed to be the optimal setting for my network. Higher rates tend to result in a higher minimum error as well as significant over-fitting, while lower values never seemed to find solutions which were as effective. 
+
+\subsubsection*{Momentum}
+Momentum did not seem to be helpful in my network, and all of my best results used 0 momentum.  Larger values of momentum ended up making the training more prone to over-fitting, especially after epoch 50 or so.  
+
+\subsubsection*{Number of Hidden Units}
+The default value of 100 seemed to be a reasonable number of hidden units for this task.  Lower values caused significantly higher minimum error rates (under-fitting), while higher values of 200 or 500 ended up causing the test-set performance to diverge from the train-set performance due to over-fitting. 
+
+\subsubsection*{Number of Epochs (early stopping)}
+Early stopping at around 30 epochs was critical for good performance of the vast majority of hyperparameter values. While low learning rates such as 0.01 sometimes did not require the early stopping, I imagine it will be an important facet of any real-world system. 
+
+\subsubsection*{Dropout values}
+
+Dropout had an interesting effect on the training error. As can be seen in Figure \ref{fig:dropout1}, the training error very quickly reaches a low value, then oscilates up and down instead of increasing as is usual. This appears to be thanks to the dropout-induced regularization, which is allowing for better generalization by keeping the network from over-optimizing too much. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../dropout1.png} 
+  \caption{Visualization of error rates of standard single-layer a network trained with dropout. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:dropout1}
+\end{figure}
+
+When tested with various numbers of numbers of hidden layers, it seemed to continue to do a good job of keeping the generalization error low even for 200 hidden layers, in contrast to what happened without dropout.  
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../dropout_layers.png} 
+  \caption{Visualization of error rates of standard single-layer a network trained with dropout and three different numbers of hidden layers. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
+  \label{fig:dropout1}
+\end{figure}
+
+\subsubsection*{$L_2$ Regularization}
+L2 regularization did not seem to have a significant effect on my results for the single-layer network with it's best values. It seems that lower learning rates and early-stopping were sufficient regularization. 
+
+\subsubsection*{Best Result}
+After exploring a wide range of parameter values over the previous sections, it became clear that a learning rate of 0.05, momentum of 0, a layer size of 100, and early-stopping at 30 epochs is the best performing combination for this code, achieving a minimum validation error of 7.9/%. 
+
+Results for Best 1-layer Performance:\\
+Class Error (Validate): 0.079\\
+Class Error (Test):		0.083\\
+Class Error (Train):	0.0\\
+CrossEnt (Validate):	0.305\\
+CrossEnt (Test):		0.330\\
+CrossEnt (Train): 		0.003\\
+
+Figure \ref{fig:onelayerbest} shows the validation error during training (red line), while Figure \ref{fig:onelayerbestfeatures} shows a visualization of the top-level features, showing a nice level of structure in the distribution of weights corresponding to edges, lines, and circular shapes of the various digits. 
+
 
 
 \begin{figure}[h]
   \centering
   \includegraphics[scale=0.6]{../one_layer_best.png} 
   \caption{Visualization of error rates of the single-layer network with the best performance. Red and blue are cross-entropy error for test and train, while green and black are categorization error for test and train respectively. }
-  \label{fig:momentumsrate1}
+  \label{fig:onelayerbest}
 \end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../one_layer_best_features.png} 
+  \caption{Best 1-layer features: visualization of 100 28x28 element top-level weights arranged in a grid. }
+  \label{fig:onelayerbestfeatures}
+\end{figure}
+
 
 
 \subsection{h) Extension to Multiple Layers}
@@ -274,7 +330,7 @@ When training a network with multiple hidden layers (two in this case), it was i
 
 To evaluate the performance of the network, a 9-cell grid-search over 3 values each of momentum and learning rate was carried out, as can be seen in Figure \ref{fig:momentumsrate1}, \ref{fig:momentumsrate2} and \ref{fig:momentumsrate3}. Momentum varied between 0.0, 0.2, and 0.5, while learning rate varied between 0.1, 0.05, and 0.01. During this training dropout was 0, and hidden-layer count was 100. 
 
-The best performer was the test with momentum at 0 and learning rate at 0.05, achieving a classification error of 8.9\% at around epoch 10. 	 
+As can be seen in the figures, higher learning rates (0.1+) and momentum (0.5) was catastrophic for the performance of the training.  It appears to be significantly more difficult to train this 2-layer network as compared to the 1-layer counterpart. 
 
 \begin{figure}[h]
   \centering
@@ -299,6 +355,18 @@ The best performer was the test with momentum at 0 and learning rate at 0.05, ac
   \label{fig:momentumsrate3}
 \end{figure}
 
+
+Figure \ref{fig:twolayerbest} shows the validation-set error of the best 2-layer performer was the test with momentum at 0 and learning rate at 0.01, achieving a classification error of 7.6\% at around epoch 10. It turned out that the 2-layer network network performed slightly better than the one-layer network, likely due to the increase capacity of the model.  I would have expected even better performance, but it may be that backpropagation through two layers of sigmoids is difficult due to vanishing gradients.. 
+
+\newpage
+Results for Best 2-layer Performance:\\
+Class Error (Validate): 0.076\\
+Class Error (Test):		0.089\\
+Class Error (Train):	0.0\\
+CrossEnt (Validate):	0.293\\
+CrossEnt (Test):		0.370\\
+CrossEnt (Train): 		0.002\\
+
 \begin{figure}[h]
   \centering
   \includegraphics[scale=0.6]{../two_layer_best.png} 
@@ -306,7 +374,15 @@ The best performer was the test with momentum at 0 and learning rate at 0.05, ac
   \label{fig:twolayerbest}
 \end{figure}
 
+The feature map from this 2-layer model, shown in Figure \ref{fig:twolayerbestfeatures}, is suggestive of why the performance was better than the 1-layer network. For this 2-layer network, the top-level weight parameters were slightly more structured, showing more distinct bright and dark areas corresponding with edges and lines. Better features would naturally contribute to an advantage for the 2-layer model. 
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.6]{../two_layer_best_features.png} 
+  \caption{Best 2-layer features: visualization of 100 28x28 element top-level weights arranged in a grid. }
+  \label{fig:twolayerbestfeatures}
+\end{figure}
 
+In the end, in my testing the 1-layer network DID outperform the 2-layer network. 
 
 \end{document}

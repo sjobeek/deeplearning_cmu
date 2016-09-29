@@ -62,7 +62,7 @@ def grad_vec_plot(vec, title=""):
 
 
 
-def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0,
+def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0, L2_reg=0.0,
                       train_filepath='./data/digitstrain.txt',
                       test_filepath='./data/digitstest.txt',
                       validation_filepath='./data/digitsvalid.txt',
@@ -173,7 +173,8 @@ def train_singlelayer(epochs=200, rate=0.1, momentum=0.0, dropout=0.0,
 
             #### Start output layer
             # Resulting gradient at lowest level (inverse sign from notes)
-            PreActOut_grad = momentum * (indicator_vector - output) + (1- momentum)*PreActOut_grad
+            PreActOut_grad = (momentum * (indicator_vector - output) + (1- momentum)*PreActOut_grad + 
+                             L2_reg * np.sum(W1.flatten()*W1.flatten()))
               # [10]
             # How much cost will change per pre-activation (at X)
 
